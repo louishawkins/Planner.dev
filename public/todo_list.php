@@ -1,11 +1,13 @@
 <?php
 function openFile($filename = 'todo.txt') {
 	$lengthFile = filesize($filename);
-	$handle = fopen($filename, 'r');
-	$contents = fread($handle, $lengthFile);
-	$contentsArray = explode("\n", $contents);
-	fclose($handle);
-	return $contentsArray;
+	if($lengthFile > 0) {
+		$handle = fopen($filename, 'r');
+		$contents = fread($handle, $lengthFile);
+		$contentsArray = explode("\n", $contents);
+		fclose($handle);
+		return $contentsArray;
+	}	
 }
 /* This function accepts an array, saves it to file, and returns nothing. */
  function saveFile($array, $filename = 'todo.txt') {
@@ -88,7 +90,7 @@ if(empty($_POST) == false) {
             <input type="file" id="file1" name="file1">
         </p>
         <p>
-            <input type="submit" value="Upload" autofocus>
+            <input type="submit" value="Upload">
         </p>
 </form>
 
