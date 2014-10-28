@@ -1,13 +1,11 @@
 <?php
 function openFile($filename = 'todo.txt') {
 	$lengthFile = filesize($filename);
-	if ($lengthFile > 0) {
-		$handle = fopen($filename, 'r');
-		$contents = fread($handle, $lengthFile);
-		$contentsArray = explode("\n", $contents);
-		fclose($handle);
-		return $contentsArray;
-	}
+	$handle = fopen($filename, 'r');
+	$contents = fread($handle, $lengthFile);
+	$contentsArray = explode("\n", $contents);
+	fclose($handle);
+	return $contentsArray;
 }
 /* This function accepts an array, saves it to file, and returns nothing. */
  function saveFile($array, $filename = 'todo.txt') {
@@ -17,12 +15,28 @@ function openFile($filename = 'todo.txt') {
 	fclose($handle);
 	return;
 }
-//Initialize a todo-list file
-if (filesize('todo.txt') <= 0) {
-	$_initItem = array('\n');
-	saveFile($_initItem);
+
+function uploadFile() {
+   	// Set the destination directory for uploads
+   	$uploadDir = './uploads/';
+    // Grab the filename from the uploaded file by using basename
+    $filename = basename($_FILES['file1']['name']);
+    // Create the saved filename using the file's original name and our upload directory
+    $savedFilename = $uploadDir . $filename;
+    // Move the file from the temp location to our uploads directory
+    move_uploaded_file($_FILES['file1']['tmp_name'], $savedFilename);
+ 	// If we did, show a link to the uploaded file
+    $_listItems = isset($savedFilename) ? saveFile(openFile($savedFilename)) : false;
+	header("Refresh:0");
+    return $_listItems;
 }
 
+//Initialize a todo-list file
+if (filesize('todo.txt') < 1) {
+	$_initItem = array("Add new items.");
+	saveFile($_initItem);
+	header("Refresh:0");
+}
 // Initialize your array by calling your function to open file.
  $_listItems = openFile();
  
@@ -40,32 +54,7 @@ if(empty($_POST) == false) {
 	$_listItems[] = $_POST['newitem'];
 	saveFile($_listItems);
 }
-?>
- 
-<?php
-
-function uploadFile() {
-   	// Set the destination directory for uploads
-   	$uploadDir = './uploads/';
-    // Grab the filename from the uploaded file by using basename
-    $filename = basename($_FILES['file1']['name']);
-    // Create the saved filename using the file's original name and our upload directory
-    $savedFilename = $uploadDir . $filename;
-    // Move the file from the temp location to our uploads directory
-    move_uploaded_file($_FILES['file1']['tmp_name'], $savedFilename);
- 	// If we did, show a link to the uploaded file
-    $_listItems = isset($savedFilename) ? saveFile(openFile($savedFilename)) : false;
-
-	header("Refresh:0");
-
-    return $_listItems;
-
-}
-
-/*function loadList($filename){
-	saveFile(openFile($filename));
-}*/
-
+// Check for FILES to upload and do it if there is...
 (count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') ? uploadFile() : false;
 
 ?>
@@ -85,22 +74,21 @@ function uploadFile() {
 		}
 	?>
 </ol>
-
  
-<!-- Create a Form to Accept New Items -->
+<!-- Accept new items -->
 <form method="POST" name="add-form" action="/todo_list.php">
 	<input id="newitem" name="newitem" type="text" placeholder="New item" autofocus>
 	<button type="submit">Add</button>
 </form>
 <h3>Load a List (.txt)</h3> 
-
+<!-- Accept uploads -->
 <form method="POST" enctype="multipart/form-data" action="/todo_list.php">
         <p>
             <label for="file1">File to upload: </label>
             <input type="file" id="file1" name="file1">
         </p>
         <p>
-            <input type="submit" value="Upload">
+            <input type="submit" value="Upload" autofocus>
         </p>
 </form>
 
