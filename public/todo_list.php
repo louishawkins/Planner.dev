@@ -27,7 +27,7 @@ function uploadFile() {
     $savedFilename = $uploadDir . $filename;
     // Move the file from the temp location to our uploads directory
     move_uploaded_file($_FILES['file1']['tmp_name'], $savedFilename);
- 	// If we did, show a link to the uploaded file
+ 	// If we did, load file into active todo-list file and refresh the page to show the new items.
     $_listItems = isset($savedFilename) ? saveFile(openFile($savedFilename)) : false;
 	header("Refresh:0");
     return $_listItems;
