@@ -38,11 +38,38 @@ if(isset($_GET) && empty($_GET) == false) {
     // If there is a post request; add the items.
 if(empty($_POST) == false) {
 	$_listItems[] = $_POST['newitem'];
-	var_dump($_POST['newitem']);
 	saveFile($_listItems);
 }
 ?>
  
+<?php
+
+function uploadFile() {
+   	// Set the destination directory for uploads
+   	$uploadDir = './uploads/';
+    // Grab the filename from the uploaded file by using basename
+    $filename = basename($_FILES['file1']['name']);
+    // Create the saved filename using the file's original name and our upload directory
+    $savedFilename = $uploadDir . $filename;
+    // Move the file from the temp location to our uploads directory
+    move_uploaded_file($_FILES['file1']['tmp_name'], $savedFilename);
+ 	// If we did, show a link to the uploaded file
+    $_listItems = isset($savedFilename) ? saveFile(openFile($savedFilename)) : false;
+
+	header("Refresh:0");
+
+    return $_listItems;
+
+}
+
+/*function loadList($filename){
+	saveFile(openFile($filename));
+}*/
+
+(count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') ? uploadFile() : false;
+
+?>
+
 <html>
 <head>
     <title>TODO App</title>
@@ -65,6 +92,17 @@ if(empty($_POST) == false) {
 	<input id="newitem" name="newitem" type="text" placeholder="New item" autofocus>
 	<button type="submit">Add</button>
 </form>
- 
+<h3>Load a List (.txt)</h3> 
+
+<form method="POST" enctype="multipart/form-data" action="/todo_list.php">
+        <p>
+            <label for="file1">File to upload: </label>
+            <input type="file" id="file1" name="file1">
+        </p>
+        <p>
+            <input type="submit" value="Upload">
+        </p>
+</form>
+
 </body>
 </html>
