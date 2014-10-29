@@ -66,8 +66,8 @@ function validateEntry($addresses) {
 function validateEntry($addresses) {
         $a_value_is_empty = null;
         foreach ($addresses as $key => $value) {
-            $empty = empty($addresses[$key]) ? true : false;
-            if($empty == true) {
+            $is_empty = empty($addresses[$key]) ? true : false;
+            if($is_empty == true) {
                 $a_value_is_empty = true;
             }//end ifs
         }//end outside foreach
