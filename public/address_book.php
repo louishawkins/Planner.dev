@@ -39,29 +39,7 @@ function newEntry($postArray) {
     return $newEntry;
 }
 
-/*
-function validateEntry($addresses) {
-        $a_value_is_empty = null;
-        foreach ($addresses as $key => $value) {
-                $empty = empty($addresses[$key]) ? true : false;
-                if($empty == true) {
-                    var_dump("Please fill in all fields");
-                    $a_value_is_empty = true;
-                }//end ifs
-        }//end outside foreach
-
-        if($a_value_is_empty != true) {
-            newEntry($addresses);
-            return 0;
-        }
-        else {
-            var_dump("A value is empty somehwere!");
-            return false;
-        }
-} //end validate entry function
-*/
-
-// Validate information entered before new entry
+// Validate information entered before new entry. If input passes, then send the input off to the newEntry function to add it to the csv.
 
 function validateEntry($addresses) {
         $a_value_is_empty = null;
@@ -80,10 +58,6 @@ if(isset($_GET) && !empty($_GET)) {
 }
 
 // Check for POST
-/*if(empty($_POST['name']) || empty($_POST['address']) empty($_POST['city']) || empty($_POST['state']) || empty($_POST['zip'])) 
-{
-    echo "missing some input!";
-}*/
 if(isset($_POST) && !empty($_POST)) {
     var_dump($_POST);
     validateEntry($_POST);
@@ -91,7 +65,7 @@ if(isset($_POST) && !empty($_POST)) {
 
 // Check for FILES
 if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
-    //blah
+    //TODO
 }
 
 // Define $addresses array
