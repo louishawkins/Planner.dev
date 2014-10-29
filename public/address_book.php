@@ -39,8 +39,7 @@ function newEntry($postArray) {
     return $newEntry;
 }
 
-// Validate information entered before new entry
-
+/*
 function validateEntry($addresses) {
         $a_value_is_empty = null;
         foreach ($addresses as $key => $value) {
@@ -59,6 +58,20 @@ function validateEntry($addresses) {
             var_dump("A value is empty somehwere!");
             return false;
         }
+} //end validate entry function
+*/
+
+// Validate information entered before new entry
+
+function validateEntry($addresses) {
+        $a_value_is_empty = null;
+        foreach ($addresses as $key => $value) {
+            $empty = empty($addresses[$key]) ? true : false;
+            if($empty == true) {
+                $a_value_is_empty = true;
+            }//end ifs
+        }//end outside foreach
+       $a_value_is_empty == false ? newEntry($addresses) : false;
 } //end validate entry function
 
 // Check for GET 
