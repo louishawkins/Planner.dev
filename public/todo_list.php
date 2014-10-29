@@ -1,4 +1,11 @@
-<?php
+<?
+function sanitize($array) {
+    foreach ($array as $key => $value) {
+        $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
+    }
+    return $array;
+}
+
 function openFile($filename = 'todo.txt') {
 	$lengthFile = filesize($filename);
 	if($lengthFile > 0) {
@@ -54,6 +61,7 @@ if(isset($_GET) && empty($_GET) == false) {
     // If there is a post request; add the items.
 if(empty($_POST) == false) {
 	$_listItems[] = $_POST['newitem'];
+	$_listItems = sanitize($_listItems);
 	saveFile($_listItems);
 }
 // Check for FILES to upload and do it if there is...
@@ -68,13 +76,12 @@ if(empty($_POST) == false) {
 </head>
 <body>
  <h1>TODO LIST</h1>
+ <p><a href="#savefile">Save List</a></p>
 <!-- Echo Out the List Items -->
 <ol>
-	<?php
-		foreach($_listItems as $key => $item) {
-			echo "<li><a href=\"?id=$key\">X</a> " . $item . "</li>";
-		}
-	?>
+<?	foreach($_listItems as $key => $item):  ?>
+	<li><?= "<a href=\"?id=$key\">X</a> " . $item; ?></li>
+	<? endforeach ?>
 </ol>
  
 <!-- Accept new items -->
