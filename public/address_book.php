@@ -1,26 +1,25 @@
 <?php
 // Function to read from CSV
 function readCSV($filename = 'contacts.csv') {
-    $lengthOfFile = filesize($filename);
-    if($lengthOfFile > 0) {
+    if(filesize($filename) > 10) {
         $handle = fopen($filename, 'r');
-        $contents = fread($handle, $lengthOfFile);
-        $contents_array = explode("\n", $contents);
+        while(!feof($handle)) {
+            $row = fgetcsv($handle);
+            if (!empty($row)) {
+                $individual_contact[] = $row;
+            }
+        }
         fclose($handle);
     }
     else {
-        $contents_array = ['Add some contacts!'];
+        $individual_contact = ['Add some contacts!'];
     }
-    $individual_contacts = array();
-    foreach ($contents_array as $key => $value) {
-        $individual_contacts[] = explode(",", $contents_array[$key]);
-    }
-   return $individual_contacts;
+   return $individual_contact;
 }
 
 // Function to write to CSV
-function writeCSV($incoming_array, $filename = 'contacts.csv') {
-    $handle = fopen($filename, 'a');
+function writeCSV($incoming_array, $write_mode = 'a', $filename = 'contacts.csv') {
+    $handle = fopen($filename, $write_mode);
     $incoming_array_as_string = implode(",", $incoming_array);
     fwrite($handle, $incoming_array_as_string . PHP_EOL);
     fclose($handle);
@@ -36,29 +35,46 @@ function newEntry() {
     return 0;
 }
 
+function removeEntry($id) {
+    $addresses = readCSV();
+    foreach ($addresses[$id] as $key => $value) {
+        unset($addresses[$id][$key]);
+    }
+    unset($addresses[$id]);
+    $addresses = array_values($addresses);
+    foreach ($addresses as $key => $value) {
+        $key == 0 ? writeCSV($addresses[$key], 'w+') : writeCSV($addresses[$key], 'a');
+    }
+}
+
 function sanitizeEntry($array) {
     foreach ($array as $key => $value) {
         $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
     }
     return $array;
 }
-
 // Validate information entered before new entry. If input passes, then send the input off to the newEntry function to add it to the csv.
-
 function validateEntry($new_post) {
         $a_value_is_empty = null;
+        $empty_keys = [];
         foreach ($new_post as $key => $value) {   
             $is_empty = empty($new_post[$key]) ? true : false;
             if($is_empty == true) {
                 $a_value_is_empty = true;
+                $empty_keys[] = $key;
             }//end ifs
         }//end outside foreach
+       if (sizeof($empty_keys) > 0) {
+            //tell the user what they're missing
+       } 
        $a_value_is_empty == false ? newEntry() : false;
 } //end validate entry function
 
+
 // Check for GET 
-if(isset($_GET) && !empty($_GET)) {
-    var_dump($_GET);
+if(isset($_GET) && !empty($_GET)) { 
+    $id = $_GET['id'];
+    removeEntry($id);
 }
 
 // Check for POST
@@ -71,73 +87,103 @@ if(isset($_POST) && !empty($_POST)) {
 if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
     //TODO
 }
-
 // Define $addresses array
 $addresses = readCSV();
+
 ?>
 
 <html>
 <head>
     <title>Address Book!</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/address_book.css">
+    <script src="/js/jquery.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
 </head>
 <body>
+    <script src="/js/bootstrap.min.js"></script>
+<div class="container">
 
-<div class="row">
-    <div id="contactList">
+<!-- Button trigger modal -->
+<div class="row" id="row_with_button">
+    <button id="addContactButton" type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">Add Contact</button>
+</div> <!-- END Button Row div -->
+
+<div class="row" id="main_row">
+    <div id="contactList" class="col-md-12">
         <h1>Contacts</h1>
-
-        <table>
+        <table class="table table-striped">
             <tr>
                 <th>Name</th>
-                <th>Address</th>
+                <th>Email</th>
+                <th>Phone</th>
                 <th>City</th>
                 <th>State</th>
-                <th>Zip</th>
+                <th>Delete</th>
             </tr>
-        
-             <!-- Loop through each of the addresses and output -->
+      <!-- Loop through each of the addresses and output -->
                 <?php
                     foreach ($addresses as $key => $value) {
                         echo "<tr>";
                         foreach ($value as $key2 => $value2) {
                             echo "<td>$value2</td>";
                         }
+                        echo "<td><a href=\"?id=$key\"><span class=\"glyphicon glyphicon-remove\"></span></a>";
+                        echo "</td>";
                         echo "</tr>";
                     }
                 ?>
     </table>
     </div> <!-- contact list div -->
-</div> <!-- row div -->
 
-    <!-- Form to accept multiple inputs -->
-<div class="row">
-    <div id="addContact">
-        <form method="POST" action="/address_book.php">
-            <p>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="Bill Murray">
-            </p>
-            <p>
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" value="123 Magic Street">
-            </p>
-            <p>
-                <label for="city">City:</label>
-                <input type="text" id="city" name="city" value="San Antonio">
-            </p>
-            <p>
-                <label for="state">State:</label>
-                <input type="text" id="state" name="state" value="Texas">
-            </p>
-            <p>
-                <label for="zip">Zip:</label>
-                <input type="text" id="zip" name="zip" value="78063">
-            </p>
-            <p>
-                <button type="submit" value="addEntry">Add Entry</button>
-            </p>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Add New Contact</h4>
+      </div> <!-- modal header -->
+        <!-- MODAL BODY WITH FORM -->
+      <div class="modal-body">
+        <form id="newContactForm" method="POST" action="/address_book.php" class="form-horizontal" role="form" >
+            <div class="form-group">
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+            </div>
+            </div>
+            <div class="form-group">
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+            </div>
+            </div>
+            <div class="form-group">
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone">
+            </div>
+            </div>
+            <div class="form-group">
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="city" name="city" placeholder="City">
+            </div>
+            </div>
+            <div class="form-group">
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="state" name="state" placeholder="State">
+            </div>
+            </div>
+      </div> <!-- modal body -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Contact</button>
+      </div> <!-- modal-footer -->
         </form>
-    </div> <!-- add contact div -->
-</div> <!-- second row div -->
+    </div> <!-- modal-content -->
+  </div> <!-- modal-dialogue -->
+</div> <!-- master modal-div -->
+<!-- end MODAL -->
+
+</div> <!-- contact list row div -->
+</div> <!-- site container div -->
 </body>
 </html>
