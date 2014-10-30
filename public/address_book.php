@@ -5,51 +5,55 @@ function readCSV($filename = 'contacts.csv') {
     if($lengthOfFile > 0) {
         $handle = fopen($filename, 'r');
         $contents = fread($handle, $lengthOfFile);
-        $contactsArray = explode("\n", $contents);
+        $contents_array = explode("\n", $contents);
         fclose($handle);
     }
     else {
-        $contactsArray = ['name', 'address'];
+        $contents_array = ['Add some contacts!'];
     }
     $individual_contacts = array();
-    foreach ($contactsArray as $key => $value) {
-        $individual_contacts[] = explode(",", $contactsArray[$key]);
+    foreach ($contents_array as $key => $value) {
+        $individual_contacts[] = explode(",", $contents_array[$key]);
     }
    return $individual_contacts;
 }
 
 // Function to write to CSV
-function writeCSV($incomingDataArray, $filename = 'contacts.csv') {
+function writeCSV($incoming_array, $filename = 'contacts.csv') {
     $handle = fopen($filename, 'a');
-    $dataArray_as_string = implode(",", $incomingDataArray);
-    fwrite($handle, $dataArray_as_string . PHP_EOL);
+    $incoming_array_as_string = implode(",", $incoming_array);
+    fwrite($handle, $incoming_array_as_string . PHP_EOL);
     fclose($handle);
 }
 
 // Function to store a new entry
-function newEntry($postArray) {
-   $newEntry = [];
-   $newEntry[] = $_POST['name'];
-   $newEntry[] = $_POST['address'];
-   $newEntry[] = $_POST['city'];
-   $newEntry[] = $_POST['state'];
-   $newEntry[] = $_POST['zip'];
-    
+function newEntry() {
+    $newEntry = array();
+    foreach ($_POST as $key => $value) {
+        $newEntry[] = $_POST[$key];
+    }
     writeCSV($newEntry);
-    return $newEntry;
+    return 0;
+}
+
+function sanitizeEntry($array) {
+    foreach ($array as $key => $value) {
+        $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
+    }
+    return $array;
 }
 
 // Validate information entered before new entry. If input passes, then send the input off to the newEntry function to add it to the csv.
 
-function validateEntry($addresses) {
+function validateEntry($new_post) {
         $a_value_is_empty = null;
-        foreach ($addresses as $key => $value) {
-            $is_empty = empty($addresses[$key]) ? true : false;
+        foreach ($new_post as $key => $value) {   
+            $is_empty = empty($new_post[$key]) ? true : false;
             if($is_empty == true) {
                 $a_value_is_empty = true;
             }//end ifs
         }//end outside foreach
-       $a_value_is_empty == false ? newEntry($addresses) : false;
+       $a_value_is_empty == false ? newEntry() : false;
 } //end validate entry function
 
 // Check for GET 
@@ -59,7 +63,7 @@ if(isset($_GET) && !empty($_GET)) {
 
 // Check for POST
 if(isset($_POST) && !empty($_POST)) {
-    var_dump($_POST);
+    $_POST = sanitizeEntry($_POST);
     validateEntry($_POST);
 }
 
