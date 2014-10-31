@@ -1,7 +1,8 @@
 <?php
 // Function to read from CSV
 function readCSV($filename = 'contacts.csv') {
-    if(filesize($filename) > 10) {
+    $individual_contact = '';
+    if(filesize($filename) > 5) {
         $handle = fopen($filename, 'r');
         while(!feof($handle)) {
             $row = fgetcsv($handle);
@@ -10,9 +11,6 @@ function readCSV($filename = 'contacts.csv') {
             }
         }
         fclose($handle);
-    }
-    else {
-        $individual_contact = ['Add some contacts!'];
     }
    return $individual_contact;
 }
@@ -35,16 +33,16 @@ function newEntry() {
     return 0;
 }
 
-function removeEntry($id) {
-    $addresses = readCSV();
+function removeEntry($id, $addresses) {
     foreach ($addresses[$id] as $key => $value) {
         unset($addresses[$id][$key]);
     }
     unset($addresses[$id]);
     $addresses = array_values($addresses);
     foreach ($addresses as $key => $value) {
-        $key == 0 ? writeCSV($addresses[$key], 'w+') : writeCSV($addresses[$key], 'a');
+        $key == 0 ? writeCSV($addresses[$key], 'w') : writeCSV($addresses[$key], 'a');
     }
+    return $addresses;
 }
 
 function sanitizeEntry($array) {
@@ -70,11 +68,13 @@ function validateEntry($new_post) {
        $a_value_is_empty == false ? newEntry() : false;
 } //end validate entry function
 
+// Define $addresses array
+$addresses = readCSV();
 
 // Check for GET 
 if(isset($_GET) && !empty($_GET)) { 
     $id = $_GET['id'];
-    removeEntry($id);
+    $addresses = removeEntry($id, $addresses);
 }
 
 // Check for POST
@@ -87,8 +87,6 @@ if(isset($_POST) && !empty($_POST)) {
 if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
     //TODO
 }
-// Define $addresses array
-$addresses = readCSV();
 
 ?>
 
@@ -112,7 +110,7 @@ $addresses = readCSV();
 <div class="row" id="main_row">
     <div id="contactList" class="col-md-12">
         <h1>Contacts</h1>
-        <table class="table table-striped">
+        <table id="contactsTable" class="table table-bordered table-hover">
             <tr>
                 <th>Name</th>
                 <th>Email</th>
@@ -123,6 +121,7 @@ $addresses = readCSV();
             </tr>
       <!-- Loop through each of the addresses and output -->
                 <?php
+                    if(filesize('contacts.csv') > 5) {
                     foreach ($addresses as $key => $value) {
                         echo "<tr>";
                         foreach ($value as $key2 => $value2) {
@@ -131,6 +130,7 @@ $addresses = readCSV();
                         echo "<td><a href=\"?id=$key\"><span class=\"glyphicon glyphicon-remove\"></span></a>";
                         echo "</td>";
                         echo "</tr>";
+                    }
                     }
                 ?>
     </table>
@@ -146,7 +146,7 @@ $addresses = readCSV();
       </div> <!-- modal header -->
         <!-- MODAL BODY WITH FORM -->
       <div class="modal-body">
-        <form id="newContactForm" method="POST" action="/address_book.php" class="form-horizontal" role="form" >
+        <form id="newContactForm" method="POST" action="/address_book.php" class="form-horizontal" role="form">
             <div class="form-group">
             <div class="col-sm-10">
                 <input type="text" class="form-control" id="name" name="name" placeholder="Name">
