@@ -1,35 +1,88 @@
 <?php
-// Function to read from CSV
-function readCSV($filename = 'contacts.csv') {
-    $individual_contact = '';
-    if(filesize($filename) > 5) {
-        $handle = fopen($filename, 'r');
-        while(!feof($handle)) {
-            $row = fgetcsv($handle);
-            if (!empty($row)) {
-                $individual_contact[] = $row;
-            }
-        }
+class AddressDataStore
+{
+    public $filename = 'address_book.csv';
+    //public $file_size = filesize($filename);
+    public $addressBook = [];
+
+    function readAddressBook()
+    {
+        $filename = $this->filename;
+            $handle = fopen($filename, 'r');
+
+            while(!feof($handle)) {
+                $row = fgetcsv($handle);
+
+                if (!empty($row)) {
+                    $addressBook[] = $row;
+                }
+            }  
+        fclose($handle);
+        return $addressBook;
+    }
+
+    function writeAddressBook($addressesArray)
+    {
+        $handle = fopen($this->filename, 'a');
+        fputcsv($handle, $addressesArray);
         fclose($handle);
     }
-   return $individual_contact;
+
 }
 
-// Function to write to CSV
-function writeCSV($incoming_array, $write_mode = 'a', $filename = 'contacts.csv') {
-    $handle = fopen($filename, $write_mode);
-    $incoming_array_as_string = implode(",", $incoming_array);
-    fwrite($handle, $incoming_array_as_string . PHP_EOL);
-    fclose($handle);
+function sanitizeEntry($array) {
+    foreach ($array as $key => $value) {
+        $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
+    }
+    return $array;
+}
+// Validate information entered before new entry. If input passes then return true.
+function validateEntry($new_post) {
+        $a_value_is_empty = null;
+        $empty_keys = [];
+        foreach ($new_post as $key => $value) {   
+            $is_empty = empty($new_post[$key]) ? true : false;
+            if($is_empty == true) {
+                $a_value_is_empty = true;
+                $empty_keys[] = $key;
+            }//end ifs
+        }//end outside foreach
+       if (sizeof($empty_keys) > 0) {
+            //tell the user what they're missing
+       } 
+       return $a_value_is_empty == false ? true : false;
+} //end validate entry function
+
+// create instance of the address book for the page
+// read the active csv an put it into contacts array that can be iterated through in the table.
+$addressBookInstance = new AddressDataStore();
+$contacts = $addressBookInstance->readAddressBook();
+
+// Check for GET queries
+if(isset($_GET) && !empty($_GET)) { 
+    $id = $_GET['id'];
+    $addresses = removeEntry($id, $addresses);
 }
 
+// Check for POST queries
+if(isset($_POST) && !empty($_POST)) {
+    $_POST = sanitizeEntry($_POST);
+    $goAhead = validateEntry($_POST);
+
+    if($goAhead == true) {
+        $contacts[] = $_POST;
+        $addressBookInstance->writeAddressBook($_POST);
+    }
+}
+/*
 // Function to store a new entry
 function newEntry() {
     $newEntry = array();
     foreach ($_POST as $key => $value) {
         $newEntry[] = $_POST[$key];
     }
-    writeCSV($newEntry);
+    $addressBookInstance
+    header("Refresh:0");
     return 0;
 }
 
@@ -44,50 +97,7 @@ function removeEntry($id, $addresses) {
     }
     return $addresses;
 }
-
-function sanitizeEntry($array) {
-    foreach ($array as $key => $value) {
-        $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
-    }
-    return $array;
-}
-// Validate information entered before new entry. If input passes, then send the input off to the newEntry function to add it to the csv.
-function validateEntry($new_post) {
-        $a_value_is_empty = null;
-        $empty_keys = [];
-        foreach ($new_post as $key => $value) {   
-            $is_empty = empty($new_post[$key]) ? true : false;
-            if($is_empty == true) {
-                $a_value_is_empty = true;
-                $empty_keys[] = $key;
-            }//end ifs
-        }//end outside foreach
-       if (sizeof($empty_keys) > 0) {
-            //tell the user what they're missing
-       } 
-       $a_value_is_empty == false ? newEntry() : false;
-} //end validate entry function
-
-// Define $addresses array
-$addresses = readCSV();
-
-// Check for GET 
-if(isset($_GET) && !empty($_GET)) { 
-    $id = $_GET['id'];
-    $addresses = removeEntry($id, $addresses);
-}
-
-// Check for POST
-if(isset($_POST) && !empty($_POST)) {
-    $_POST = sanitizeEntry($_POST);
-    validateEntry($_POST);
-}
-
-// Check for FILES
-if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
-    //TODO
-}
-
+*/
 ?>
 
 <html>
@@ -121,8 +131,7 @@ if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES[
             </tr>
       <!-- Loop through each of the addresses and output -->
                 <?php
-                    if(filesize('contacts.csv') > 5) {
-                    foreach ($addresses as $key => $value) {
+                    foreach ($contacts as $key => $value) {
                         echo "<tr>";
                         foreach ($value as $key2 => $value2) {
                             echo "<td>$value2</td>";
@@ -130,7 +139,6 @@ if(sizeof($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES[
                         echo "<td><a href=\"?id=$key\"><span class=\"glyphicon glyphicon-remove\"></span></a>";
                         echo "</td>";
                         echo "</tr>";
-                    }
                     }
                 ?>
     </table>
