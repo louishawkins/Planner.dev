@@ -3,7 +3,11 @@
 // TODO: ADD LOAD CONTACT LIST FUNCTION, RENAME ADD CONTACT MODAL
 class AddressDataStore
 {
-    public $filename = 'data/address_book.csv';
+    public $filename = '';
+
+    function __construct() {
+        $this->filename = "data/address_book.csv";
+    }
 
     function readAddressBook()
     {
