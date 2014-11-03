@@ -1,0 +1,25 @@
+body {
+	background-color: #e0e0e0;
+}
+
+.container {
+	margin: 0 auto;
+}
+
+#main_row {
+	margin-top: 20px;
+}
+
+#contactsTable {
+	background-color: #ffffff;
+}
+
+#newContactForm {
+
+}
+
+#addContactButton {
+	position: relative;
+	top: 20px;
+	float: right;
+}

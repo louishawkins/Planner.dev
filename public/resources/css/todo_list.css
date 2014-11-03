@@ -1,0 +1,22 @@
+body {
+	background-image: url("../img/tiny_grid.png");
+	font-family: sans-serif;
+	margin-left: 200px;
+}
+
+h1, h2 {
+	font-family: sans-serif;
+	color: black;
+	text-decoration: underline;
+	font-size: 3em; 
+}
+
+li {
+	padding: 5px;
+	position: relative;
+}
+
+#todo_list_container {
+	position: relative;
+	top: -15px;
+}
