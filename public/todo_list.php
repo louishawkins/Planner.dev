@@ -1,7 +1,7 @@
 <?php require_once 'resources/includes/todo.php' ; ?>
 <html>
 <head>
-    <title>TODO App</title>
+    <title>To-Do List Application</title>
     <link rel="stylesheet" href="resources/css/todo_list.css">
 </head>
 <body>

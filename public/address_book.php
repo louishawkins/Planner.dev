@@ -1,7 +1,7 @@
 <?php require_once 'resources/includes/address.php' ; ?>
 <html>
 <head>
-    <title>Address Book!</title>
+    <title>Address Book Application</title>
     <link rel="stylesheet" href="resources/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/address_book.css">
     <script src="resources/js/jquery.min.js"></script>
