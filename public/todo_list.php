@@ -1,4 +1,31 @@
 <?
+class TodoList
+{
+    public $filename;
+
+    function writeList($items)
+    {
+        $handle = fopen($this->filename, 'w');
+        $string = implode("\n", $items);
+        fwrite($handle, $string);
+        fclose($handle);
+    }
+
+    function readList()
+    {
+        $contentsArray = array();
+        $filesize = filesize($this->filename);
+        if (filesize($this->filename) > 0) {
+        	$handle = fopen($this->filename, 'r');
+        	$contents = trim(fread($handle, $filesize));
+        	$contentsArray = explode("\n", $contents);
+        	fclose($handle);
+        }
+
+        return $contentsArray;
+    }
+}
+
 function sanitize($array) {
     foreach ($array as $key => $value) {
         $array[$key] = htmlspecialchars(strip_tags($value));  // Overwrite each value.
@@ -6,28 +33,9 @@ function sanitize($array) {
     return $array;
 }
 
-function openFile($filename = 'todo.txt') {
-	$lengthFile = filesize($filename);
-	if($lengthFile > 0) {
-		$handle = fopen($filename, 'r');
-		$contents = fread($handle, $lengthFile);
-		$contentsArray = explode("\n", $contents);
-		fclose($handle);
-		return $contentsArray;
-	}	
-}
-/* This function accepts an array, saves it to file, and returns nothing. */
- function saveFile($array, $filename = 'todo.txt') {
-	$handle = fopen($filename, 'w');
-	$string = implode("\n", $array);
-	fwrite($handle, $string);
-	fclose($handle);
-	return;
-}
-
 function uploadFile() {
    	// Set the destination directory for uploads
-   	$uploadDir = './uploads/';
+   	$uploadDir = 'data/uploads/';
     // Grab the filename from the uploaded file by using basename
     $filename = basename($_FILES['file1']['name']);
     // Create the saved filename using the file's original name and our upload directory
@@ -35,51 +43,59 @@ function uploadFile() {
     // Move the file from the temp location to our uploads directory
     move_uploaded_file($_FILES['file1']['tmp_name'], $savedFilename);
  	// If we did, load file into active todo-list file and refresh the page to show the new items.
-    $_listItems = isset($savedFilename) ? saveFile(openFile($savedFilename)) : false;
-	header("Refresh:0");
-    return $_listItems;
+    $ok = isset($savedFilename) ? true : false;
+
+    if($ok) {
+    	return $savedFilename;
+    }
 }
 
-//Initialize a todo-list file
-if (filesize('todo.txt') < 1) {
-	$_initItem = array("Add new items.");
-	saveFile($_initItem);
-	header("Refresh:0");
+$list = new TodoList();
+
+// Check for FILES to upload and do it if there is...
+if (count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
+	$list->filename = uploadFile();
+	$all_items = $list->readList();
+	$list->filename = "data/todo.txt";
+	$list->writeList($all_items);
 }
-// Initialize your array by calling your function to open file.
- $_listItems = openFile();
- 
+else {
+	$list->filename = "data/todo.txt";
+}
+
+$all_items = $list->readList();
+
 // Check for GET Requests
      // If there is a get request; remove the appropriate item.
-if(isset($_GET) && empty($_GET) == false) {
+if(isset($_GET) && !empty($_GET)) {
 	$id = $_GET['id'];
-	unset($_listItems[$id]);
-	array_values($_listItems);
-	saveFile($_listItems);
+	unset($all_items[$id]);
+	$all_items = array_values($all_items);
+	$list->writeList($all_items);
 }
+
  // Check for POST Requests
     // If there is a post request; add the items.
-if(empty($_POST) == false) {
-	$_listItems[] = $_POST['newitem'];
-	$_listItems = sanitize($_listItems);
-	saveFile($_listItems);
+if(isset($_POST) && !empty($_POST)) {
+	$_POST = sanitize($_POST);
+	$all_items[] = $_POST['newitem'];
+	$list->writeList($all_items);
+
 }
-// Check for FILES to upload and do it if there is...
-(count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') ? uploadFile() : false;
 
 ?>
 
 <html>
 <head>
     <title>TODO App</title>
-    <link rel="stylesheet" href="/css/todo_list.css">
+    <link rel="stylesheet" href="resources/css/todo_list.css">
 </head>
 <body>
  <h1>TODO LIST</h1>
  <p><a href="#savefile">Save List</a></p>
 <!-- Echo Out the List Items -->
 <ol>
-<?	foreach($_listItems as $key => $item):  ?>
+<?	foreach($all_items as $key => $item):  ?>
 	<li><?= "<a href=\"?id=$key\">X</a> " . $item; ?></li>
 	<? endforeach ?>
 </ol>

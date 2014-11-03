@@ -1,7 +1,9 @@
 <?php
+
+// TODO: ADD LOAD CONTACT LIST FUNCTION, RENAME ADD CONTACT MODAL
 class AddressDataStore
 {
-    public $filename = 'address_book.csv';
+    public $filename = 'data/address_book.csv';
 
     function readAddressBook()
     {
@@ -29,7 +31,6 @@ class AddressDataStore
         }
         fclose($handle);
     }
-
 }
 
 function sanitizeEntry($array) {
@@ -85,13 +86,12 @@ if(isset($_POST) && !empty($_POST)) {
 <html>
 <head>
     <title>Address Book!</title>
-    <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/address_book.css">
-    <script src="/js/jquery.min.js"></script>
-    <script src="~/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css">
+    <link rel="stylesheet" href="resources/css/address_book.css">
+    <script src="resources/js/jquery.min.js"></script>
+    <script src="resources/js/bootstrap.min.js"></script>
 </head>
-<body>
-    <script src="/js/bootstrap.min.js"></script>
+<body>s
 <div class="container">
 
 <!-- Button trigger modal -->
@@ -132,7 +132,7 @@ if(isset($_POST) && !empty($_POST)) {
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title" id="myModalLabel">Add New Contact</h4>
+        <h4 class="modal-title" id="myModal">Add New Contact</h4>
       </div> <!-- modal header -->
         <!-- MODAL BODY WITH FORM -->
       <div class="modal-body">
