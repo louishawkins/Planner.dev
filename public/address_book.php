@@ -2,11 +2,10 @@
 class AddressDataStore
 {
     public $filename = 'address_book.csv';
-    //public $file_size = filesize($filename);
-    public $addressBook = [];
 
     function readAddressBook()
     {
+        $addressBook = [];
         $filename = $this->filename;
             $handle = fopen($filename, 'r');
 
@@ -18,13 +17,16 @@ class AddressDataStore
                 }
             }  
         fclose($handle);
+
         return $addressBook;
     }
 
     function writeAddressBook($addressesArray)
     {
-        $handle = fopen($this->filename, 'a');
-        fputcsv($handle, $addressesArray);
+        $handle = fopen($this->filename, 'w');
+        foreach ($addressesArray as $row) {
+            fputcsv($handle, $row);
+        }
         fclose($handle);
     }
 
@@ -56,48 +58,28 @@ function validateEntry($new_post) {
 // create instance of the address book for the page
 // read the active csv an put it into contacts array that can be iterated through in the table.
 $addressBookInstance = new AddressDataStore();
+$address_book_filesize = filesize($addressBookInstance->filename);
 $contacts = $addressBookInstance->readAddressBook();
 
 // Check for GET queries
+// REMOVE ENTRY code is here:
 if(isset($_GET) && !empty($_GET)) { 
     $id = $_GET['id'];
-    $addresses = removeEntry($id, $addresses);
+    unset($contacts[$id]);
+    $contacts = array_values($contacts);
+    $addressBookInstance->writeAddressBook($contacts);
 }
 
 // Check for POST queries
 if(isset($_POST) && !empty($_POST)) {
     $_POST = sanitizeEntry($_POST);
-    $goAhead = validateEntry($_POST);
+    $entry_is_valid = validateEntry($_POST);
 
-    if($goAhead == true) {
+    if($entry_is_valid == true) {
         $contacts[] = $_POST;
-        $addressBookInstance->writeAddressBook($_POST);
+        $addressBookInstance->writeAddressBook($contacts);
     }
 }
-/*
-// Function to store a new entry
-function newEntry() {
-    $newEntry = array();
-    foreach ($_POST as $key => $value) {
-        $newEntry[] = $_POST[$key];
-    }
-    $addressBookInstance
-    header("Refresh:0");
-    return 0;
-}
-
-function removeEntry($id, $addresses) {
-    foreach ($addresses[$id] as $key => $value) {
-        unset($addresses[$id][$key]);
-    }
-    unset($addresses[$id]);
-    $addresses = array_values($addresses);
-    foreach ($addresses as $key => $value) {
-        $key == 0 ? writeCSV($addresses[$key], 'w') : writeCSV($addresses[$key], 'a');
-    }
-    return $addresses;
-}
-*/
 ?>
 
 <html>
