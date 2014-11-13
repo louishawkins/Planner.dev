@@ -1,39 +1,18 @@
 <?php
 
+require_once 'filestore.php';
+
 // TODO: ADD LOAD CONTACT LIST FUNCTION, RENAME ADD CONTACT MODAL
-class AddressDataStore
+class AddressDataStore extends Filestore
 {
-    public $filename = '';
-
-    function __construct($filename = 'data/address_book.csv') {
-        $this->filename = $filename;
-    }
-
     function readAddressBook()
     {
-        $addressBook = [];
-        $filename = $this->filename;
-            $handle = fopen($filename, 'r');
-
-            while(!feof($handle)) {
-                $row = fgetcsv($handle);
-
-                if (!empty($row)) {
-                    $addressBook[] = $row;
-                }
-            }  
-        fclose($handle);
-
-        return $addressBook;
+	return $this->readCSV();    
     }
 
     function writeAddressBook($addressesArray)
     {
-        $handle = fopen($this->filename, 'w');
-        foreach ($addressesArray as $row) {
-            fputcsv($handle, $row);
-        }
-        fclose($handle);
+        return $this->writeCSV($addressesArray); 
     }
 }
 

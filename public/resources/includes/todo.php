@@ -1,5 +1,8 @@
 <?
-class TodoList
+
+include_once 'filestore.php';
+
+class TodoList extends Filestore
 {
     public $filename;
 
