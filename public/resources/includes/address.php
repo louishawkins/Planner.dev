@@ -5,8 +5,8 @@ class AddressDataStore
 {
     public $filename = '';
 
-    function __construct() {
-        $this->filename = "data/address_book.csv";
+    function __construct($filename = 'data/address_book.csv') {
+        $this->filename = $filename;
     }
 
     function readAddressBook()
