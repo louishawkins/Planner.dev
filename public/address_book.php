@@ -7,7 +7,7 @@
     <script src="resources/js/jquery.min.js"></script>
     <script src="resources/js/bootstrap.min.js"></script>
 </head>
-<body>s
+<body>
 <div class="container">
 
 <!-- Button trigger modal -->

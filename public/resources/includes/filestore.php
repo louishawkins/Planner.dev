@@ -6,28 +6,30 @@
 
      function __construct($filename)
      {
-        $this->filename = $filename;
+        return $this->filename = $filename;
      }
 
-     /**
-      * Returns array of lines in $this->filename
-      */
      function readLines()
      {
-	 //what here?    
+	$contentsArray = array();
+	$filesize = filesize($this->filename);
+	if (filesize($this->filename) > 0){
+		$handle = fopen($this->filename, 'r');
+		$contents = trim(fread($handle, $filesize));
+		$contentsArray = explode("\n", $contents);
+		fclose($handle);
+	}	
+	return $contentsArray;
      }
 
-     /**
-      * Writes each element in $array to a new line in $this->filename
-      */
-     function writeLines($array)
+     function writeLines($items)
      {
-	//what here?
+	$handle = fopen($this->filename, 'w');
+	$string = implode("\n", $items);
+	fwrite($handle, $string);
+	fclose($handle);
      }
 
-     /**
-      * Reads contents of csv $this->filename, returns an array
-      */
      function readCSV()
      {
 	$addressBook = [];
@@ -46,9 +48,6 @@
 	return $addressBook;	
      }
 
-     /**
-      * Writes contents of $array to csv $this->filename
-      */
      function writeCSV($addressesArray)
      {
 	

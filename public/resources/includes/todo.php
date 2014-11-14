@@ -4,27 +4,14 @@ include_once 'filestore.php';
 
 class TodoList extends Filestore
 {
-    public $filename;
-
     function writeList($items)
     {
-        $handle = fopen($this->filename, 'w');
-        $string = implode("\n", $items);
-        fwrite($handle, $string);
-        fclose($handle);
+	return $this->writeLines($items);    
     }
 
     function readList()
     {
-        $contentsArray = array();
-        $filesize = filesize($this->filename);
-        if (filesize($this->filename) > 0) {
-        	$handle = fopen($this->filename, 'r');
-        	$contents = trim(fread($handle, $filesize));
-        	$contentsArray = explode("\n", $contents);
-        	fclose($handle);
-        }
-        return $contentsArray;
+	return $this->readLines();    
     }
 }
 
@@ -49,17 +36,14 @@ function uploadFile() {
 }
 
 // create a new instance of a todo-list
-$list = new TodoList();
-
+$list = new TodoList('data/todo.txt');
+$list->filename = 'data/todo.txt';
 // Check for FILES to upload and do it if there is...
 if (count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
 	$list->filename = uploadFile();
 	$all_items = $list->readList();
 	$list->filename = "data/todo.txt";
 	$list->writeList($all_items);
-}
-else {
-	$list->filename = "data/todo.txt";
 }
 
 $all_items = $list->readList();
