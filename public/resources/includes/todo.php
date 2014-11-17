@@ -6,12 +6,12 @@ class TodoList extends Filestore
 {
     function writeList($items)
     {
-	return $this->writeLines($items);    
+	return $this->write($items);    
     }
 
     function readList()
     {
-	return $this->readLines();    
+	return $this->read();    
     }
 }
 
@@ -36,8 +36,8 @@ function uploadFile() {
 }
 
 // create a new instance of a todo-list
-$list = new TodoList('data/todo.txt');
-$list->filename = 'data/todo.txt';
+$list = new TodoList($filename = 'data/todo.txt');
+
 // Check for FILES to upload and do it if there is...
 if (count($_FILES) > 0 && $_FILES['file1']['error'] == UPLOAD_ERR_OK && $_FILES['file1']['type'] == 'text/plain') {
 	$list->filename = uploadFile();

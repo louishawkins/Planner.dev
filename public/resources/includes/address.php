@@ -2,6 +2,7 @@
 
 require_once 'filestore.php'; // file storage class (Filestore)
 require_once 'datastore.php'; // data storage class (AddressDataStore) -> extends Filestore
+define('FILE', 'data/address_book.csv');
 
 function sanitizeEntry($array) {
     foreach ($array as $key => $value) {
@@ -12,10 +13,9 @@ function sanitizeEntry($array) {
 // Validate information entered before new entry. If input passes then return true.
 function validateEntry($new_post) {
         $a_value_is_empty = null;
-        $empty_keys = [];
+        $empty_keys = []; // to-do: array of keys that are empty
         foreach ($new_post as $key => $value) {   
-            $is_empty = empty($new_post[$key]) ? true : false;
-            if($is_empty == true) {
+            if(empty($new_post[$key])) {
                 $a_value_is_empty = true;
                 $empty_keys[] = $key;
             }//end ifs
@@ -26,30 +26,22 @@ function validateEntry($new_post) {
        return $a_value_is_empty == false ? true : false;
 } //end validate entry function
 
-function check_GET($GET){
-	return isset($GET) && !empty($GET) ? true : false;
-}
+$addressBookInstance = new AddressDataStore(FILE);
+$contacts = $addressBookInstance->read();
 
-function check_POST($POST){
-	return isset($POST) && !empty($POST) ? true : false;
-}
-
-$addressBookInstance = new AddressDataStore($filename = 'data/address_book.csv');
-$contacts = $addressBookInstance->readAddressBook();
-
-if(check_GET($_GET)) {
+if(isset($_GET['id'])) {
         $id = $_GET['id'];
         unset($contacts[$id]);
         $contacts = array_values($contacts);
-        $addressBookInstance->writeAddressBook($contacts);
+        $addressBookInstance->write($contacts);
 }
 
-if(check_POST($_POST)) {
+if(!empty($_POST)) {
     $_POST = sanitizeEntry($_POST);
 
     if(validateEntry($_POST)) {
         $contacts[] = $_POST;
-        $addressBookInstance->writeAddressBook($contacts);
+        $addressBookInstance->write($contacts);
     }
 }
 ?>

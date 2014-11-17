@@ -68,11 +68,9 @@
                 <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone">
             </div>
             </div>
-            <div class="form-group">
-            <div class="col-sm-10">
+            <div class="form-group"><div class="col-sm-10">
                 <input type="text" class="form-control" id="city" name="city" placeholder="City">
-            </div>
-            </div>
+            </div></div>
             <div class="form-group">
             <div class="col-sm-10">
                 <input type="text" class="form-control" id="state" name="state" placeholder="State">
