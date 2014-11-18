@@ -1,4 +1,4 @@
-<?php require_once 'resources/includes/address.php' ; ?>
+<?php require_once 'resources/includes/address.php'; ?>
 <html>
 <head>
     <title>Address Book Application</title>

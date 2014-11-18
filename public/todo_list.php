@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>To-Do List Application</title>
+    <link rel="stylesheet" href="resources/css/bootstrap.min.css">
     <link rel="stylesheet" href="resources/css/todo_list.css">
 </head>
 <body>
