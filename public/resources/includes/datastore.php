@@ -6,6 +6,5 @@ class AddressDataStore extends Filestore
 		// make sure the filename is lowercase
 		$filename = strtolower($filename);
 		parent::__construct($filename);
-
 	}
 }    

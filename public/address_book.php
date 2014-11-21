@@ -34,11 +34,12 @@
                         foreach ($value as $key2 => $value2) {
                             echo "<td>$value2</td>";
                         }
-                        echo "<td><a href=\"?id=$key\"><span class=\"glyphicon glyphicon-remove\"></span></a>";
+                        echo "<td><a href=\"?id=$key\"><span class=\"glyphicon glyphicon-plus\"></span></a>";
                         echo "</td>";
                         echo "</tr>";
                     }
                 ?>
+
     </table>
     </div> <!-- contact list div -->
 
