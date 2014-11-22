@@ -25,9 +25,9 @@
 <!-- SIDEBAR -->
     <div id="sidebar" class="col-md-2">
         <ul>
-            <li><a href="?list=active">Active (<? echo $total_rows; ?>)</a></li>
-            <li><a href="?list=completed">Completed</a></li>
-            <li><a href="?list=removed">Removed</a></li>
+            <li><a href="?list=active">Active (<? echo $total_active; ?>)</a></li>
+            <li><a href="?list=completed">Completed (<? echo $total_completed; ?>)</a></li>
+            <li><a href="?list=removed">Removed (<? echo $total_removed; ?>)</a></li>
         </ul>
     </div> <!-- end SIDEBAR div -->
 <!-- LIST VIEWER -->
@@ -42,7 +42,7 @@
             <?php
                 foreach($rows as $row) {
                     echo "<tr>";
-                        echo "<td><a href=\"#completed\"><span class=\"glyphicon glyphicon-ok\"></span></a></td>";
+                        echo "<td><a href=\"?complete={$row['id']}\"><span class=\"glyphicon glyphicon-ok\"></span></a></td>";
                         echo "<td>{$row['priority']}</td>";
                         echo "<td>{$row['content']}</td>";
                         echo "<td><a href=\"?remove={$row['id']}\"><span class=\"glyphicon glyphicon-remove-circle\"></span></a></td>";

@@ -23,9 +23,17 @@ class Todo {
         
         if($fail_validation == false) {
             $this->passed_validation = true;
-            $this->new_entry['priority'] =  $array['priority'];
             $this->new_entry['content']  =  $array['content'];
-            $this->new_entry['due']      =  $array['due'];
+            if(isset($array['priority'])) {
+                $this->new_entry['priority'] =  $array['priority'];
+            } else {
+                $this->new_entry['priority'] = null;
+            }
+            if(isset($array['due'])) {
+                $this->new_entry['due']      =  $array['due'];
+            } else {
+                $this->new_entry['due'] = null;
+            }
         }
     }
 
@@ -69,6 +77,8 @@ if(!empty($_POST)) {
 }
 
 $rows = array();
+
+// pagination variables
 $items_per_page = 10;
 $page = (isset($_GET['page']) && $_GET['page'] > 0) ? $_GET['page'] : 1;
 $offset = ($page - 1) * 10;   
@@ -82,31 +92,45 @@ if(isset($_GET['remove'])) {
 }
 
 // Are we marking anything as completed? ... then do this.
-if(isset($_GET['completed'])){
+if(isset($_GET['complete'])){
     $complete = "UPDATE items SET completed = 1 WHERE id = :id";
     $stmt = $dbc->prepare($complete);
-    $stmt->bindValue(':id', $_GET['remove'], PDO::PARAM_INT);
+    $stmt->bindValue(':id', $_GET['complete'], PDO::PARAM_INT);
     $stmt->execute();
 }
+
+
+// Determine the total number of active records
+$rows_active = $dbc->prepare("SELECT * FROM items WHERE removed = 0 AND completed = 0");
+$rows_active->execute();
+$total_active = $rows_active->rowCount();
+
+// total number of completed records
+$rows_completed = $dbc->prepare("SELECT * FROM items WHERE removed = 0 AND completed = 1");
+$rows_completed->execute();
+$total_completed = $rows_completed->rowCount();
+
+// total number of removed records
+$rows_removed = $dbc->prepare("SELECT * FROM items WHERE removed = 1");
+$rows_removed->execute();
+$total_removed = $rows_removed->rowCount();
 
 // pagination for different categories of lists
 if(isset($_GET['list'])) {
     if($_GET['list'] == "completed") {
-        $query = "SELECT priority, content, id FROM items WHERE completed = 1 LIMIT :items_per_page OFFSET :offset";
+        $query = "SELECT priority, content, id FROM items WHERE completed = 1 AND removed = 0  LIMIT :items_per_page OFFSET :offset";
+        $total_rows_to_display = $total_completed;
     } elseif ($_GET['list'] == "removed") {
         $query = "SELECT priority, content, id FROM items WHERE removed = 1 LIMIT :items_per_page OFFSET :offset";
-    } elseif ($_GET['list']) {
+        $total_rows_to_display = $total_removed;
+    } elseif ($_GET['list'] == "active") {
         $query = "SELECT priority, content, id FROM items WHERE completed = 0 AND removed = 0 LIMIT :items_per_page OFFSET :offset";
+        $total_rows_to_display = $total_active;
     }
 } else {
     $query = "SELECT priority, content, id FROM items WHERE completed = 0 AND removed = 0 LIMIT :items_per_page OFFSET :offset";
+    $total_rows_to_display = $total_active;
 }
-
-// Determine the total number of records
-$rows_stmt = $dbc->prepare("SELECT * FROM items");
-$rows_stmt->execute();
-$total_rows = $rows_stmt->rowCount();
-
 // Select the rows to be displayed per page
 $stmt = $dbc->prepare($query);
 $stmt->bindValue(':items_per_page', $items_per_page, PDO::PARAM_INT);
@@ -121,17 +145,12 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $rows[] = $row;
 }
 
-$lastpage = (ceil($total_rows/$items_per_page));
+$lastpage = (ceil($total_rows_to_display/$items_per_page));
 $prev = $page == 1 ? 1 : $page - 1;
 $next = $page == $lastpage ? $lastpage : $page + 1;  
 
 // Previous/Next buttons for rendering in HTML
 $Previous = "<li><a href=\"?page=$prev\">Previous</a></li>";
 $Next = "<li><a href=\"?page=$next\">Next</a></li>";
-
-if(isset($_GET['id'])) {
-
-}
-
 
 ?>
